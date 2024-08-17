@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { type } from "os";
 
 const userSchema = new mongoose.Schema({
 
@@ -27,8 +26,19 @@ const userSchema = new mongoose.Schema({
 
     },
     isAdmin:{
+        type:Boolean,
+        default: false
         
-    }
+    },
+    
+    forgotPasswordToken: String,
+    forgotPasswordTokenExpires: Date,
+    verifyToken: String,
+    verifyTokenExpires: Date
 
 
 })
+
+const User = mongoose.models.users || mongoose.model('users', userSchema)
+
+export default User
