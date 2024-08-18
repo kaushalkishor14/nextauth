@@ -1,24 +1,44 @@
+import User from "@/models/userModel";
 import nodemailer from "nodemailer";
+import bcryptjs from 'bcryptjs'
+
 
 export const sendEmail = async ({ email, emailType, userId }:any) => {
 
 
   try {
 
+       const hashToken =  await bcryptjs.hash(userId.toString(), 10)
 
-    // todo configer mail for uses
+    if(emailType === 'VERIFY'){
+
+      await User.findByIdAndUpdate(userId,
+        {
+           verifyToken: hashToken, 
+           verifyTokenExpires: Date.now() + 3600000
+        },
+         )
+
+    } else if (emailType === 'RESET'){
+      await User.findByIdAndUpdate(userId,
+        {
+          forgotPasswordToken: hashToken, 
+          forgotPasswordTokenExpires: Date.now() + 3600000
+        },
+      )
+
+    }
 
 
 
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,                                    // Use `true` for port 465, `false` for all other ports
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "maddison53@ethereal.email",
-        pass: "jn7jnAPss4f63QBp6D",
-      },
+        user: "22c3aab2b9e2bd",     //
+        pass: "8c1d94aeee2560"     //
+      }
     });
 
     const mailOption = { 
@@ -26,7 +46,11 @@ export const sendEmail = async ({ email, emailType, userId }:any) => {
       to: email,                                                                        // list of receivers
       subject: emailType === 'VERIFY' ? "very your email" : "Reset your password",       // Subject line
       text: "Hello world?",                                                                // plain text body
-      html: "<b>Hello world?</b>",                                                          // html body
+      html: `<p> Click <a href="${process.env.DOMAIN}/verifyemail?token=${hashToken}">here </a> to ${emailType === 'VERIFY' ? 'verify' : 'reset your password'}
+       or copy and paste the link below in browser.
+       <br>
+       ${process.env.DOMAIN}/verifyemail?token=${hashToken}
+       </p>`,                                                          // html body
     };
 
 
