@@ -5,7 +5,7 @@ import bcryptjs from 'bcryptjs';
 import { sendEmail } from '@/helpers/mailer';
 
 // Establish database connection
-connect();
+connect()
 
 export async function POST(request: NextRequest) {
     try {
